@@ -49,8 +49,9 @@ def main():
     parser.add_argument('-l', '--limit', metavar='L', type=int,
                         help='limit to the first L words', default=500)
     parser.add_argument('-n', '--normalize', action='store_true',
-                        help='normalize')
+                        help='normalize each word vector to unit L2 norm')
     args = parser.parse_args()
+
     if len(args.inputs) == 1:
         i_emb = args.inputs[0]
         with open(i_emb, 'rb') as fin:
