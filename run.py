@@ -48,6 +48,8 @@ def main():
                         help='output filename [outfile.png]')
     parser.add_argument('-l', '--limit', metavar='L', type=int,
                         help='limit to the first L words', default=500)
+    parser.add_argument('-n', '--normalize', action='store_true',
+                        help='normalize')
     args = parser.parse_args()
     if len(args.inputs) == 1:
         i_emb = args.inputs[0]
@@ -64,6 +66,9 @@ def main():
     else:
         parser.print_usage()
         exit(1)
+
+    if args.normalize:
+        x /= np.sqrt((x ** 2).sum(-1))[:, np.newaxis]
     
     out = calc_tsne.tsne(x, no_dims=2, perplexity=30, initial_dims=30)
     data = [(title, point[0], point[1]) for (title, point) in zip(titles, out)]
