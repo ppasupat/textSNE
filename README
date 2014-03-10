@@ -1,9 +1,8 @@
-textSNE
-=======
+# textSNE
 
 Python code for rendering t-SNE code with text labels for each point.
 
-Forked from Joseph Turian's <https://github.com/turian/textSNE>
+Forked from Joseph Turian's repository (https://github.com/turian/textSNE).
 
 This version does not require ImageMagick and is slightly less verbose.
 
