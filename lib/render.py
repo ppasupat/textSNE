@@ -23,6 +23,7 @@ def render(points, filename, width=3000, height=1800, fontfile=DEFAULT_FONT,
     H = height
 
     im = Image.new("L", (W, H), WHITE)
+    dr = ImageDraw.Draw(im)
 
     if fontfile is not None:
         assert os.path.exists(fontfile)
@@ -55,18 +56,17 @@ def render(points, filename, width=3000, height=1800, fontfile=DEFAULT_FONT,
         if idx % 10 == 0:
             print >> sys.stderr, "\033[F\033[KRendering title (#%d): %s" % \
                 (idx, repr(title))
-        
-        # Make a grayscale image of the font, white on black.
         pos = (x, y)
-        imtext = Image.new("L", im.size, BLACK)
-        drtext = ImageDraw.Draw(imtext)
-        drtext.text(pos, title, font=font, fill=(256-256*transparency))
+        if transparency:
+            imtext = Image.new("L", im.size, BLACK)
+            drtext = ImageDraw.Draw(imtext)
+            drtext.text(pos, title, font=font, fill=(256-256*transparency))
+            alpha = ImageChops.add(alpha, imtext)
+        else:
+            dr.text(pos, title, font=font)
 
-        # Add the white text to our collected alpha channel. Gray pixels around
-        # the edge of the text will eventually become partially transparent
-        # pixels in the alpha channel.
-        alpha = ImageChops.add(alpha, imtext)
+    if transparency:
+        im.paste(Image.new('L', im.size, 0), mask=alpha)
     
-    im.paste(Image.new('L', im.size, 0), mask=alpha)
     print >> sys.stderr, "\033[F\033[KRendering image to file", filename
     im.save(filename)
