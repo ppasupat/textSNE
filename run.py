@@ -108,6 +108,8 @@ def main():
     
     out = calc_tsne.tsne(x, use_pca=bool(args.pca), initial_dims=args.pca)
     data = [(title, point[0], point[1]) for (title, point) in zip(titles, out)]
+    if not os.path.exists(args.outdir):
+        os.makedirs(args.outdir)
     for filename, highlight_words in highlights:
         filename = os.path.join(args.outdir, filename + '.png')
         render.render(data, filename, highlight_words)
