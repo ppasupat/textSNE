@@ -19,6 +19,8 @@ def render(points, filename, width=3000, height=1800, fontfile=DEFAULT_FONT,
     """
     W = width
     H = height
+    if not highlights:
+        highlights = dict()
 
     im = Image.new("RGB", (W, H), (255, 255, 255))
     dr = ImageDraw.Draw(im)
@@ -45,27 +47,16 @@ def render(points, filename, width=3000, height=1800, fontfile=DEFAULT_FONT,
     maxx += dx * margin
     maxy += dy * margin
 
-    alpha = Image.new("L", im.size, 0)
-    print >> sys.stderr
+    # Sort by highlight color (so that highlighted words are rendered last)
+    pairs = [(highlights.get(pt[0], 0), pt) for pt in points]
+    points = [pair[1] for pair in sorted(pairs)]
 
-    if highlights:
-        # Sort by highlight color
-        points = [pair[1] for pair in 
-                  sorted(((highlights.get(pt[0], 0), idx), pt)
-                         for (idx, pt) in enumerate(points))]
-
-    for (idx, pt) in enumerate(points):
+    for pt in points:
         (title, x, y) = pt
         x = 1. * (x - minx) / (maxx - minx) * W
         y = 1. * (y - miny) / (maxy - miny) * H
-        if idx % 10 == 0:
-            print >> sys.stderr, "\033[F\033[KRendering title (#%d): %s" % \
-                (idx, repr(title))
         pos = (x, y)
-        if highlights and title in highlights:
-            dr.text(pos, title, font=font, fill=highlights[title])
-        else:
-            dr.text(pos, title, font=font, fill=0)
+        dr.text(pos, title, font=font, fill=highlights.get(title, 0))
     
-    print >> sys.stderr, "\033[F\033[KRendering image to file", filename
+    print >> sys.stderr, "Rendering image to file", filename
     im.save(filename)
