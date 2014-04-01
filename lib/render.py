@@ -8,8 +8,8 @@ from PIL import Image, ImageFont, ImageDraw, ImageChops
 
 DEFAULT_FONT = None
 
-def render(points, filename, width=3000, height=1800, fontfile=DEFAULT_FONT,
-           fontsize=12, margin=0.05, highlights=None):
+def render(points, filename, highlights, width=3000, height=1800,
+           fontfile=DEFAULT_FONT, fontsize=12, margin=0.05):
     """
     Render t-SNE text points to an image file.
     points: a list of tuples of the form (title, x, y).
@@ -48,7 +48,7 @@ def render(points, filename, width=3000, height=1800, fontfile=DEFAULT_FONT,
     maxy += dy * margin
 
     # Sort by highlight color (so that highlighted words are rendered last)
-    points = sorted((highlights.get(pt[0], 0), pt) for pt in points)
+    points = sorted((int(pt[0] in highlights) * 255, pt) for pt in points)
 
     for (fill, pt) in points:
         (title, x, y) = pt
