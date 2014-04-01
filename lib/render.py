@@ -48,6 +48,7 @@ def render(points, filename, width=3000, height=1800, fontfile=DEFAULT_FONT,
     maxy += dy * margin
 
     alpha = Image.new("L", im.size, BLACK)
+    print >> sys.stderr
 
     for (idx, pt) in enumerate(points):
         (title, x, y) = pt
