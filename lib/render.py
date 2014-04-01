@@ -48,15 +48,14 @@ def render(points, filename, width=3000, height=1800, fontfile=DEFAULT_FONT,
     maxy += dy * margin
 
     # Sort by highlight color (so that highlighted words are rendered last)
-    pairs = [(highlights.get(pt[0], 0), pt) for pt in points]
-    points = [pair[1] for pair in sorted(pairs)]
+    points = sorted((highlights.get(pt[0], 0), pt) for pt in points)
 
-    for pt in points:
+    for (fill, pt) in points:
         (title, x, y) = pt
         x = 1. * (x - minx) / (maxx - minx) * W
         y = 1. * (y - miny) / (maxy - miny) * H
         pos = (x, y)
-        dr.text(pos, title, font=font, fill=highlights.get(title, 0))
+        dr.text(pos, title, font=font, fill=fill)
     
     print >> sys.stderr, "Rendering image to file", filename
     im.save(filename)
