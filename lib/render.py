@@ -7,11 +7,9 @@ import os, sys
 from PIL import Image, ImageFont, ImageDraw, ImageChops
 
 DEFAULT_FONT = None
-BLACK = 0
-WHITE = 255
 
 def render(points, filename, width=3000, height=1800, fontfile=DEFAULT_FONT,
-           fontsize=12, margin=0.05, transparency=0.4):
+           fontsize=12, margin=0.05, highlights=None):
     """
     Render t-SNE text points to an image file.
     points: a list of tuples of the form (title, x, y).
@@ -22,7 +20,7 @@ def render(points, filename, width=3000, height=1800, fontfile=DEFAULT_FONT,
     W = width
     H = height
 
-    im = Image.new("L", (W, H), WHITE)
+    im = Image.new("RGB", (W, H), (255, 255, 255))
     dr = ImageDraw.Draw(im)
 
     if fontfile is not None:
@@ -47,8 +45,14 @@ def render(points, filename, width=3000, height=1800, fontfile=DEFAULT_FONT,
     maxx += dx * margin
     maxy += dy * margin
 
-    alpha = Image.new("L", im.size, BLACK)
+    alpha = Image.new("L", im.size, 0)
     print >> sys.stderr
+
+    if highlights:
+        # Sort by highlight color
+        points = [pair[1] for pair in 
+                  sorted(((highlights.get(pt[0], 0), idx), pt)
+                         for (idx, pt) in enumerate(points))]
 
     for (idx, pt) in enumerate(points):
         (title, x, y) = pt
@@ -58,16 +62,10 @@ def render(points, filename, width=3000, height=1800, fontfile=DEFAULT_FONT,
             print >> sys.stderr, "\033[F\033[KRendering title (#%d): %s" % \
                 (idx, repr(title))
         pos = (x, y)
-        if transparency:
-            imtext = Image.new("L", im.size, BLACK)
-            drtext = ImageDraw.Draw(imtext)
-            drtext.text(pos, title, font=font, fill=(256-256*transparency))
-            alpha = ImageChops.add(alpha, imtext)
+        if highlights and title in highlights:
+            dr.text(pos, title, font=font, fill=highlights[title])
         else:
-            dr.text(pos, title, font=font)
-
-    if transparency:
-        im.paste(Image.new('L', im.size, 0), mask=alpha)
+            dr.text(pos, title, font=font, fill=0)
     
     print >> sys.stderr, "\033[F\033[KRendering image to file", filename
     im.save(filename)
