@@ -52,9 +52,12 @@ def main():
                         help='normalize each word vector to unit L2 norm')
     parser.add_argument('-f', '--fast', action='store_true',
                         help='ignore transparency to speed up rendering')
+    parser.add_argument('-F', '--font', help='path to font file')
     parser.add_argument('-p', '--pca', type=int, default=0,
                         help='perform PCA with this number of dimensions'
                         'before calling SNE')
+    parser.add_argument('-s', '--scale', type=float, default=1.0,
+                        help='scale up the image by this factor')
     args = parser.parse_args()
 
     if len(args.inputs) == 1:
@@ -78,7 +81,9 @@ def main():
     
     out = calc_tsne.tsne(x, use_pca=bool(args.pca), initial_dims=args.pca)
     data = [(title, point[0], point[1]) for (title, point) in zip(titles, out)]
-    render.render(data, args.output, transparency=(0 if args.fast else 0.4))
+    render.render(data, args.output, transparency=(0 if args.fast else 0.4),
+                  width=int(3000*args.scale), height=int(2000*args.scale),
+                  fontfile=args.font)
 
 if __name__ == '__main__':
     main()

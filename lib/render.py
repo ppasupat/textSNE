@@ -6,11 +6,10 @@ Requires PIL (Python Imaging Library) or Pillow.
 import os, sys
 from PIL import Image, ImageFont, ImageDraw, ImageChops
 
-DEFAULT_FONT = None
 BLACK = 0
 WHITE = 255
 
-def render(points, filename, width=3000, height=1800, fontfile=DEFAULT_FONT,
+def render(points, filename, width=3000, height=2000, fontfile=None,
            fontsize=12, margin=0.05, transparency=0.4):
     """
     Render t-SNE text points to an image file.
@@ -54,6 +53,7 @@ def render(points, filename, width=3000, height=1800, fontfile=DEFAULT_FONT,
         (title, x, y) = pt
         x = 1. * (x - minx) / (maxx - minx) * W
         y = 1. * (y - miny) / (maxy - miny) * H
+        title = title.decode('utf8')
         if idx % 10 == 0:
             print >> sys.stderr, "\033[F\033[KRendering title (#%d): %s" % \
                 (idx, repr(title))
