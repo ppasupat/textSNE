@@ -54,39 +54,48 @@ def main():
     parser.add_argument('outdir', help='output directory')
     parser.add_argument('-l', '--limit', metavar='L', type=int,
                         help='limit to the first L words', default=500)
+    parser.add_argument('-L', '--hard-limit', action='store_true',
+                        help='obey the word limit and ignore extra highlight words')
     parser.add_argument('-r', '--random-threshold', type=float, default=0.0,
                         help='randomly ignore words with this probability'
                         'when finding top L words')
     parser.add_argument('-n', '--normalize', action='store_true',
                         help='normalize each word vector to unit L2 norm')
+    parser.add_argument('-F', '--font', help='path to font file')
     parser.add_argument('-p', '--pca', type=int, default=0,
                         help='perform PCA with this number of dimensions'
                         'before calling SNE')
     parser.add_argument('-H', '--highlights', metavar='FILENAME', nargs='+',
                         help='load words to highlight from files')
+    parser.add_argument('-s', '--scale', type=float, default=1.0,
+                        help='scale up the image by this factor')
     args = parser.parse_args()
 
     highlights = []
     all_highlight_words = set()
-    for filename in args.highlights:
-        with open(filename, 'r') as fin:
-            highlight_words = set()
-            for line in fin:
-                line = line.strip()
-                if line:
-                    highlight_words.add(line)
-            print 'Read %d highlight words from %s!' % \
-                (len(highlight_words), filename)
-            highlights.append((os.path.basename(filename), highlight_words))
-            all_highlight_words.update(highlight_words)
+    if not args.highlights:
+        highlights.append(('out', set()))
+    else:
+        for filename in args.highlights:
+            with open(filename, 'r') as fin:
+                highlight_words = set()
+                for line in fin:
+                    line = line.strip()
+                    if line:
+                        highlight_words.add(line)
+                print 'Read %d highlight words from %s!' % \
+                    (len(highlight_words), filename)
+                highlights.append((os.path.basename(filename), highlight_words))
+                all_highlight_words.update(highlight_words)
 
     if len(args.inputs) == 1:
         i_emb = args.inputs[0]
         with open(i_emb, 'rb') as fin:
             print 'Reading combined data from %s ...' % i_emb
+            highlight_words = [] if args.hard_limit else all_highlight_words
             titles, x = read_data(combined_reader(fin),
                                   limit=args.limit,
-                                  highlights=all_highlight_words,
+                                  highlights=highlight_words,
                                   random_threshold=args.random_threshold)
     elif len(args.inputs) == 2:
         i_We, i_words = args.inputs
@@ -94,9 +103,10 @@ def main():
             print 'Reading vocab from %s ...' % i_words
             with open(i_We, 'rb') as fWe:
                 print 'Reading vectors from %s ...' % i_We
+                highlight_words = [] if args.hard_limit else all_highlight_words
                 titles, x = read_data(separated_reader(fWe, fwords),
                                       limit=args.limit,
-                                      highlights=all_highlight_words,
+                                      highlights=highlight_words,
                                       random_threshold=args.random_threshold)
     else:
         parser.print_usage()
@@ -112,7 +122,8 @@ def main():
         os.makedirs(args.outdir)
     for filename, highlight_words in highlights:
         filename = os.path.join(args.outdir, filename + '.png')
-        render.render(data, filename, highlight_words)
+        render.render(data, filename, highlight_words, fontfile=args.font,
+                      width=int(3000*args.scale), height=int(2000*args.scale))
 
 if __name__ == '__main__':
     main()
