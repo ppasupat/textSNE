@@ -69,6 +69,8 @@ def main():
                         help='load words to highlight from files')
     parser.add_argument('-s', '--scale', type=float, default=1.0,
                         help='scale up the image by this factor')
+    parser.add_argument('-a', '--anonymize', action='store_true',
+                        help='render all texts as X')
     args = parser.parse_args()
 
     highlights = []
@@ -123,7 +125,8 @@ def main():
     for filename, highlight_words in highlights:
         filename = os.path.join(args.outdir, filename + '.png')
         render.render(data, filename, highlight_words, fontfile=args.font,
-                      width=int(3000*args.scale), height=int(2000*args.scale))
+                      width=int(3000*args.scale), height=int(2000*args.scale),
+                      anonymize=args.anonymize)
 
 if __name__ == '__main__':
     main()

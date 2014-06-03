@@ -7,7 +7,7 @@ import os, sys
 from PIL import Image, ImageFont, ImageDraw, ImageChops
 
 def render(points, filename, highlights, width=3000, height=2000,
-           fontfile=None, fontsize=12, margin=0.05):
+           fontfile=None, fontsize=12, margin=0.05, anonymize=False):
     """
     Render t-SNE text points to an image file.
     points: a list of tuples of the form (title, x, y).
@@ -52,6 +52,8 @@ def render(points, filename, highlights, width=3000, height=2000,
         (title, x, y) = pt
         x = 1. * (x - minx) / (maxx - minx) * W
         y = 1. * (y - miny) / (maxy - miny) * H
+        if anonymize:
+            title = 'X'
         if font:
             title = title.decode('utf8')
         pos = (x, y)
